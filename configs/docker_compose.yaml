@@ -6,11 +6,25 @@ services:
     container_name: zookeeper
     ports:
       - "2181:2181"
-  kafka:
+  kafka1:
     image: wurstmeister/kafka
-    container_name: kafka
+    container_name: kafka1
     ports:
       - "9092:9092"
+    depends_on: 
+      - zookeeper
     environment:
-      KAFKA_ADVERTISED_HOST_NAME: localhost
+      KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_HOST_NAME: localhost
+  kafka2:
+    image: wurstmeister/kafka
+    container_name: kafka2
+    ports:
+      - "9093:9093"
+    depends_on: 
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_HOST_NAME: localhost
