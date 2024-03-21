@@ -5,7 +5,7 @@ We fit the classical machine learning algorithm to predict magnitude of differen
 # Setup 
 
 ## Docker images
-```bash
+1. Run `zookeeper` and `kafka` images:
+```bash 
 docker-compose --file ./configs/docker_compose.yaml up 
 ```
-

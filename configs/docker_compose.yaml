@@ -22,6 +22,23 @@ services:
       KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka1:9092, EXTERNAL://localhost:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: EXTERNAL:PLAINTEXT, INTERNAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+  init-kafka1:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - kafka1
+    entrypoint: [ '/bin/bash', '-c' ]
+    command: |
+      "
+      # blocks until kafka is reachable
+      kafka-topics --bootstrap-server kafka1:9092 --list
+
+      echo -e 'Creating kafka topics'
+      kafka-topics --bootstrap-server kafka1:9092 --create --if-not-exists --topic raw_data_topic --replication-factor 1 --partitions 1
+      kafka-topics --bootstrap-server kafka1:9092 --create --if-not-exists --topic ml_results_topic --replication-factor 1 --partitions 1
+
+      echo -e 'Successfully created the following topics:'
+      kafka-topics --bootstrap-server kafka1:9092 --list
+      "
 
   kafka2:
     image: confluentinc/cp-kafka:latest
@@ -37,3 +54,20 @@ services:
       KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka2:9093, EXTERNAL://localhost:29093 
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: EXTERNAL:PLAINTEXT, INTERNAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+  init-kafka2:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - kafka2
+    entrypoint: [ '/bin/bash', '-c' ]
+    command: |
+      "
+      # blocks until kafka is reachable
+      kafka-topics --bootstrap-server kafka2:9093 --list
+
+      echo -e 'Creating kafka topics'
+      kafka-topics --bootstrap-server kafka2:9093 --create --if-not-exists --topic processed_data_topic --replication-factor 1 --partitions 1
+
+      echo -e 'Successfully created the following topics:'
+      kafka-topics --bootstrap-server kafka2:9093 --list
+      "
+  
