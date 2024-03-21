@@ -11,7 +11,7 @@ docker-compose --file ./configs/docker_compose.yaml up
 ```
 
 ## Requirements
-1. Install requirementsL
+1. Install requirements:
 ```bash
 pip install -r requirements.txt
 ```
