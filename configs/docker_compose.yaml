@@ -1,30 +1,39 @@
+
 version: '3'
 
 services:
   zookeeper:
-    image: wurstmeister/zookeeper
+    image: confluentinc/cp-zookeeper:latest
     container_name: zookeeper
-    ports:
-      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+
   kafka1:
-    image: wurstmeister/kafka
+    image: confluentinc/cp-kafka:latest
     container_name: kafka1
     ports:
-      - "9092:9092"
-    depends_on: 
+      - "29092:29092"
+    depends_on:
       - zookeeper
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_HOST_NAME: localhost
+      KAFKA_LISTENER: INTERNAL://:9092, EXTERNAL://:29092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka1:9092, EXTERNAL://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: EXTERNAL:PLAINTEXT, INTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+
   kafka2:
-    image: wurstmeister/kafka
+    image: confluentinc/cp-kafka:latest
     container_name: kafka2
     ports:
-      - "9093:9093"
-    depends_on: 
+      - "29093:29093"
+    depends_on:
       - zookeeper
     environment:
       KAFKA_BROKER_ID: 2
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_HOST_NAME: localhost
+      KAFKA_LISTENER: INTERNAL://:9093, EXTERNAL://:29093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka2:9093, EXTERNAL://localhost:29093 
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: EXTERNAL:PLAINTEXT, INTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
