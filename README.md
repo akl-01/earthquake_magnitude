@@ -9,3 +9,9 @@ We fit the classical machine learning algorithm to predict magnitude of differen
 ```bash 
 docker-compose --file ./configs/docker_compose.yaml up 
 ```
+
+# Requirements
+1. Install requirementsL
+```bash
+pip install -r requirements.txt
+```
