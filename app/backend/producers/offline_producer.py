@@ -49,7 +49,7 @@ class OfflineProducer():
             self.producer.produce(self.send_topic, value=data, callback=delivery_report)
             self.producer.flush()
             if self.sleep:
-                time.sleep(10)
+                time.sleep(100)
 
 if __name__ == "__main__":
     csv_path = "./data/earthquake_1995-2023.csv"

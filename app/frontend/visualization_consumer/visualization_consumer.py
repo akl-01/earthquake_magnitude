@@ -2,10 +2,11 @@ import pandas as pd
 import numpy as np
 from confluent_kafka import Producer
 from confluent_kafka import Consumer
-import time
-import json
 import logging as log
+import json
 from typing import Any
+
+import streamlit as st 
 
 logger = log.getLogger(__name__)
 logger.setLevel(log.INFO)
@@ -14,8 +15,16 @@ console_formater = log.Formatter("[ %(levelname)s ] %(message)s")
 console.setFormatter(console_formater)
 logger.addHandler(console)
 
-class Stremlit():
-    pass
+st.set_page_config(
+    page_title="Real-Time Data Dashboard",
+    layout="wide",
+)
+
+if "magnitude" not in st.session_state:
+    st.session_state["magnitude"] = []
+
+st.title("Magnitude")
+chart_holder = st.empty()
 
 class VisualizationConsumer():
     def __init__(
@@ -26,7 +35,7 @@ class VisualizationConsumer():
     ) -> None:
         self.conf = {
             'bootstrap.servers': f"{bootstrap_host}:{bootstrap_port}", 
-            'group.id': 'ml_consumer',
+            'group.id': 'vs_consumer',
         }
         self.bootstrap_host = bootstrap_host
         self.bootstrap_port = bootstrap_port
@@ -43,8 +52,6 @@ class VisualizationConsumer():
         logger.info("Connection is established")
     
     def read(self) -> None:
-        logger.info("Get producer")
-        stremlit = self.stremlit
         logger.info(f"Read data from {self.read_topic}")
         # get the data and send to stremlit
         while True:
@@ -55,9 +62,14 @@ class VisualizationConsumer():
             if msg.error():
                 logger.info("Consumer error: {}".format(msg.error()))
                 continue
-            
-            logger.info('Received message: {}'.format(msg.value().decode('utf-8')))
 
+            logger.info('Received message: {}'.format(msg.value().decode('utf-8')))
+            data = json.loads(msg.value().decode('utf-8'))
+
+            st.session_state["magnitude"].append(data['predict'])
+        
+            chart_holder.line_chart(st.session_state["magnitude"])
+            
 
 if __name__ == "__main__":
     consumer = VisualizationConsumer(
