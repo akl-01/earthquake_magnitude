@@ -4,14 +4,20 @@ We fit the classical machine learning algorithm to predict magnitude of differen
 
 # Setup 
 
-## Docker images
+1. Set up `PYTHONPATH`:
+```bash
+export PYTHONPATH=${PYTHONPATH}:${PWD}
+```
+
+2. Install requirements:
+```bash
+pip install -r requirements.txt
+```
+
+# Running 
 1. Run `zookeeper` and `kafka` images:
 ```bash 
 docker-compose --file ./configs/docker_compose.yaml up 
 ```
 
-## Requirements
-1. Install requirements:
-```bash
-pip install -r requirements.txt
-```
+2. For now open terminal and run scripts independently
