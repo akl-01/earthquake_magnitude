@@ -4,12 +4,7 @@ We fit the classical machine learning algorithm to predict magnitude of differen
 
 # Setup 
 
-1. Set up `PYTHONPATH`:
-```bash
-export PYTHONPATH=${PYTHONPATH}:${PWD}
-```
-
-2. Install requirements:
+1. Install requirements:
 ```bash
 pip install -r requirements.txt
 ```
