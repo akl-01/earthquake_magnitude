@@ -1,10 +1,9 @@
-import pandas as pd
-import numpy as np
-from confluent_kafka import Producer
 from confluent_kafka import Consumer
 import logging as log
 import json
 from typing import Any
+import plotly.express as px
+import pandas as pd
 
 import streamlit as st 
 
@@ -22,9 +21,18 @@ st.set_page_config(
 
 if "magnitude" not in st.session_state:
     st.session_state["magnitude"] = []
+if "mae" not in st.session_state:
+    st.session_state["mae"] = []
+if "mse" not in st.session_state:
+    st.session_state["mse"] = []
 
-st.title("Magnitude")
-chart_holder = st.empty()
+st.title("Real-time metrics")
+st.subheader("Magnitude")
+mag_chart_holder = st.empty()
+st.subheader("MAE")
+mae_chart_holder = st.empty()
+st.subheader("MSE")
+mse_chart_holder = st.empty()
 
 class VisualizationConsumer():
     def __init__(
@@ -67,8 +75,12 @@ class VisualizationConsumer():
             data = json.loads(msg.value().decode('utf-8'))
 
             st.session_state["magnitude"].append(data['predict'])
-        
-            chart_holder.line_chart(st.session_state["magnitude"])
+            st.session_state["mae"].append(data["mae"])
+            st.session_state["mse"].append(data["mse"])
+
+            mag_chart_holder.line_chart(st.session_state["magnitude"])
+            mae_chart_holder.line_chart(st.session_state["mae"])
+            mse_chart_holder.line_chart(st.session_state["mse"])
             
 
 if __name__ == "__main__":
