@@ -37,11 +37,8 @@ class RealTimeProducer():
 
     def real_time(self) -> Any:
         logger.info(f"Getting real time data")
-        #start_time = datetime.datetime.now()
-        #time.sleep(10)
-        start_date = datetime.datetime.now().date()
-        start_time = datetime.time.min
-        start_time = datetime.datetime.combine(start_date, start_time)
+        start_time = datetime.datetime.now()
+        time.sleep(10)
         end_time = datetime.datetime.now()
         events = search(starttime=start_time, endtime=end_time)
         logger.info(f"Returned {len(events)} events")
