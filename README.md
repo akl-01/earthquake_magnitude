@@ -8,11 +8,7 @@ We employ the classical machine learning algorithm to predict magnitude of diffe
 ```bash
 pip install -r requirements.txt
 ```
-
-# Running 
-1. Run `zookeeper` and `kafka` images:
-```bash 
-docker-compose --file ./configs/docker_compose.yaml up 
+2. Run the script:
+```bash
+python3 run.py
 ```
-
-2. For now open terminal and run scripts independently
