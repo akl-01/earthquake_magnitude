@@ -6,6 +6,10 @@ import time
 import json
 import logging as log
 from typing import Any
+from utils import delivery_report
+
+from catboost import CatBoostRegressor
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 logger = log.getLogger(__name__)
 logger.setLevel(log.INFO)
@@ -36,7 +40,7 @@ class MLProducer():
         logger.info("Connection is established")
 
     def send(self, data: Any) -> None:
-        self.producer.produce(self.send_topic, key='1', value=json.dumps(data))
+        self.producer.produce(self.send_topic, key='1', value=json.dumps(data), callback=delivery_report)
         self.producer.flush()
         logger.info(f"Produced: {data}")
         if self.sleep:
@@ -78,8 +82,15 @@ class MLConsumer():
     
     def read(self) -> None:
         logger.info("Get producer")
-        producer = self.producer
+        _producer = self.producer
         logger.info(f"Read data from {self.read_topic}")
+        model = CatBoostRegressor(
+            iterations=4200,
+            learning_rate=1,
+            depth=3,
+            loss_function="RMSE"
+        )
+        model.load_model("./weights/model.pkl")
         # run model and send results
         while True:
             msg = self.consumer.poll(10)
@@ -89,8 +100,22 @@ class MLConsumer():
             if msg.error():
                 logger.info("Consumer error: {}".format(msg.error()))
                 continue
-            
+        
             logger.info('Received message: {}'.format(msg.value().decode('utf-8')))
+
+            df = pd.read_json(msg.value().decode('utf-8'), orient="index")
+            df = df.transpose()
+            X, y = df.drop(["magnitude"], axis=1), df["magnitude"]
+            predict = model.predict(X)
+            mae = mean_absolute_error(y, predict)
+            mse = mean_squared_error(y, predict)
+            results = {
+                "predict": predict.tolist(),
+                "mae": mae,
+                "mse": mse
+            }
+            _producer.send(results)
+
 
 
 if __name__ == "__main__":

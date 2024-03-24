@@ -6,6 +6,7 @@ import time
 import json
 import logging as log
 from typing import Any
+from utils import preprocess, delivery_report
 
 logger = log.getLogger(__name__)
 logger.setLevel(log.INFO)
@@ -36,9 +37,9 @@ class DataProcessorProducer():
         logger.info("Connection is established")
 
     def send(self, data: Any) -> None:
-        self.producer.produce(self.send_topic, key='1', value=json.dumps(data))
+        self.producer.produce(self.send_topic, key='1', value=data, callback=delivery_report)
         self.producer.flush()
-        logger.info(f"Produced: {data}")
+        #logger.info(f"Produced: {data}")
         if self.sleep:
             time.sleep(10)
 
@@ -78,19 +79,27 @@ class DataProcessorConsumer():
     
     def read(self) -> None:
         logger.info("Get producer")
-        producer = self.producer
+        _producer = self.producer
         logger.info(f"Read data from {self.read_topic}")
-        # preprocess and send
         while True:
             msg = self.consumer.poll(10)
+
             if msg is None:
                 logger.info("Message is None")
                 continue
             if msg.error():
-                logger.info("Consumer error: {}".format(msg.error()))
+                logger.info(f"Consumer error: {msg.error()}")
                 continue
+            #logger.info(f"Recieved message: {msg.value()}")
             
-            logger.info('Received message: {}'.format(msg.value().decode('utf-8')))
+            df = pd.read_json(msg.value().decode('utf-8'), orient="index")
+            df = df.transpose()
+            df = preprocess(df)
+
+            data = df.to_json()
+
+            logger.info(f"Preprocessed data: {data}")
+            _producer.send(data)
 
 
 if __name__ == "__main__":

@@ -14,7 +14,7 @@ console_formater = log.Formatter("[ %(levelname)s ] %(message)s")
 console.setFormatter(console_formater)
 logger.addHandler(console)
 
-class Producer_v2():
+class OfflineProducer():
     def __init__(
         self,
         bootstrap_host: str,
@@ -43,16 +43,17 @@ class Producer_v2():
         logger.info(f"Sending data to {self.send_topic}")
         while True:
             df_entry = self.data.iloc[np.random.randint(low=low, high=high), :]
-            df_entry = df_entry.drop(["magnitudo"])
-            data = df_entry.to_json()
+            temp = pd.Series({"real_time": 0})
+            data = pd.concat([df_entry, temp])
+            data = data.to_json()
             self.producer.produce(self.send_topic, value=data, callback=delivery_report)
             self.producer.flush()
             if self.sleep:
-                time.sleep(15)
+                time.sleep(100)
 
 if __name__ == "__main__":
-    csv_path = "./data/real_time_data.csv"
-    producer = Producer_v2(
+    csv_path = "./data/earthquake_1995-2023.csv"
+    producer = OfflineProducer(
         bootstrap_host="localhost",
         bootstrap_port="9095",
         data_path=csv_path,
